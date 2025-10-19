@@ -1996,7 +1996,365 @@ function ReduxV2:CreateMain(title)
 				return colorPickerFunctions
 			end
 			
-			-- DYNAMIC CONTENT MANAGEMENT FUNCTIONS
+			function sectionFunctions:CreatePopup()
+				local popupService = {}
+
+				-- Get the same parent as the main UI
+				local player = game.Players.LocalPlayer
+				local parent = player:WaitForChild("PlayerGui")
+
+				-- Popup styles that match your UI theme
+				local PopupStyles = {
+					Default = {
+						Accent = Colors.Accent,
+						Icon = "⚡",
+						Background = Colors.Secondary
+					},
+					Success = {
+						Accent = Color3.fromRGB(34, 197, 94),
+						Icon = "✓",
+						Background = Color3.fromRGB(20, 40, 25)
+					},
+					Warning = {
+						Accent = Color3.fromRGB(245, 158, 11),
+						Icon = "⚠",
+						Background = Color3.fromRGB(40, 35, 20)
+					},
+					Error = {
+						Accent = Color3.fromRGB(239, 68, 68),
+						Icon = "✕",
+						Background = Color3.fromRGB(40, 20, 25)
+					},
+					Question = {
+						Accent = Color3.fromRGB(59, 130, 246),
+						Icon = "?",
+						Background = Color3.fromRGB(20, 25, 40)
+					}
+				}
+
+				-- Main popup creation function
+				function popupService:Show(options)
+					options = options or {}
+
+					local style = PopupStyles[options.Style or "Default"]
+					local title = options.Title or "Notification"
+					local message = options.Message or ""
+					local buttons = options.Buttons or {"OK"}
+					local duration = options.Duration or 0
+					local callback = options.Callback
+
+					print("🎯 [POPUP] Creating popup:", title)
+
+					-- Create popup ScreenGui for this specific popup
+					local PopupScreenGui = Instance.new("ScreenGui")
+					PopupScreenGui.Name = "ReduxV2Popup_" .. title
+					PopupScreenGui.Parent = parent
+					PopupScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+					PopupScreenGui.ResetOnSpawn = false
+					PopupScreenGui.Enabled = true
+
+					-- Main popup frame (matches your UI design)
+					local Popup = Instance.new("Frame")
+					Popup.Name = "Popup"
+					Popup.Parent = PopupScreenGui
+					Popup.BackgroundColor3 = Colors.Background
+					Popup.BorderColor3 = Colors.Border
+					Popup.BorderSizePixel = 1
+					Popup.Position = UDim2.new(0.5, -200, 0.5, -120)
+					Popup.Size = UDim2.new(0, 400, 0, 240) -- Similar to main UI size
+					Popup.ClipsDescendants = true
+					Popup.ZIndex = 99
+
+					local PopupCorner = Instance.new("UICorner")
+					PopupCorner.Parent = Popup
+					PopupCorner.CornerRadius = UDim.new(0, 8)
+
+					-- Header (matches your top bar design)
+					local Header = Instance.new("Frame")
+					Header.Name = "Header"
+					Header.Parent = Popup
+					Header.BackgroundColor3 = Colors.Secondary
+					Header.BorderSizePixel = 0
+					Header.Size = UDim2.new(1, 0, 0, 32)
+					Header.ZIndex = 100
+
+					local HeaderCorner = Instance.new("UICorner")
+					HeaderCorner.Parent = Header
+					HeaderCorner.CornerRadius = UDim.new(0, 8)
+
+					-- Accent bar at top (thin like your UI)
+					local AccentBar = Instance.new("Frame")
+					AccentBar.Name = "AccentBar"
+					AccentBar.Parent = Header
+					AccentBar.BackgroundColor3 = style.Accent
+					AccentBar.BorderSizePixel = 0
+					AccentBar.Size = UDim2.new(1, 0, 0, 2)
+					AccentBar.ZIndex = 101
+
+					-- Header content
+					local HeaderContent = Instance.new("Frame")
+					HeaderContent.Name = "HeaderContent"
+					HeaderContent.Parent = Header
+					HeaderContent.BackgroundTransparency = 1
+					HeaderContent.Position = UDim2.new(0, 12, 0, 0)
+					HeaderContent.Size = UDim2.new(1, -24, 1, 0)
+					HeaderContent.ZIndex = 101
+
+					local Icon = Instance.new("TextLabel")
+					Icon.Name = "Icon"
+					Icon.Parent = HeaderContent
+					Icon.BackgroundTransparency = 1
+					Icon.Position = UDim2.new(0, 0, 0, 0)
+					Icon.Size = UDim2.new(0, 20, 1, 0)
+					Icon.Font = Enum.Font.GothamBold
+					Icon.Text = style.Icon
+					Icon.TextColor3 = style.Accent
+					Icon.TextSize = 14
+					Icon.ZIndex = 102
+
+					local Title = Instance.new("TextLabel")
+					Title.Name = "Title"
+					Title.Parent = HeaderContent
+					Title.BackgroundTransparency = 1
+					Title.Position = UDim2.new(0, 25, 0, 0)
+					Title.Size = UDim2.new(0.7, 0, 1, 0)
+					Title.Font = Enum.Font.GothamMedium
+					Title.Text = title
+					Title.TextColor3 = Colors.Text
+					Title.TextSize = 13
+					Title.TextXAlignment = Enum.TextXAlignment.Left
+					Title.ZIndex = 102
+
+					-- Close button (matches your UI close button)
+					local CloseButton = Instance.new("TextButton")
+					CloseButton.Name = "CloseButton"
+					CloseButton.Parent = HeaderContent
+					CloseButton.BackgroundTransparency = 1
+					CloseButton.Position = UDim2.new(1, -28, 0, 0)
+					CloseButton.Size = UDim2.new(0, 28, 1, 0)
+					CloseButton.Font = Enum.Font.GothamMedium
+					CloseButton.Text = "×"
+					CloseButton.TextColor3 = Colors.TextMuted
+					CloseButton.TextSize = 16
+					CloseButton.ZIndex = 102
+					CloseButton.AutoButtonColor = false
+
+					-- Content area
+					local Content = Instance.new("Frame")
+					Content.Name = "Content"
+					Content.Parent = Popup
+					Content.BackgroundTransparency = 1
+					Content.Position = UDim2.new(0, 16, 0, 40)
+					Content.Size = UDim2.new(1, -32, 0, 120)
+					Content.ZIndex = 100
+
+					local Message = Instance.new("TextLabel")
+					Message.Name = "Message"
+					Message.Parent = Content
+					Message.BackgroundTransparency = 1
+					Message.Size = UDim2.new(1, 0, 1, 0)
+					Message.Font = Enum.Font.Gotham
+					Message.Text = message
+					Message.TextColor3 = Colors.Text
+					Message.TextSize = 12
+					Message.TextWrapped = true
+					Message.TextYAlignment = Enum.TextYAlignment.Top
+					Message.ZIndex = 101
+
+					-- Buttons container (matches your UI button style)
+					local ButtonsContainer = Instance.new("Frame")
+					ButtonsContainer.Name = "ButtonsContainer"
+					ButtonsContainer.Parent = Popup
+					ButtonsContainer.BackgroundTransparency = 1
+					ButtonsContainer.Position = UDim2.new(0, 16, 1, -48)
+					ButtonsContainer.Size = UDim2.new(1, -32, 0, 32)
+					ButtonsContainer.ZIndex = 100
+
+					local ButtonsLayout = Instance.new("UIListLayout")
+					ButtonsLayout.Parent = ButtonsContainer
+					ButtonsLayout.FillDirection = Enum.FillDirection.Horizontal
+					ButtonsLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+					ButtonsLayout.SortOrder = Enum.SortOrder.LayoutOrder
+					ButtonsLayout.Padding = UDim.new(0, 8)
+
+					-- Button creation function (matches your UI buttons)
+					local function createButtons()
+						for i, buttonText in pairs(buttons) do
+							local Button = Instance.new("TextButton")
+							Button.Name = buttonText
+							Button.Parent = ButtonsContainer
+							Button.BackgroundColor3 = i == #buttons and style.Accent or Colors.Secondary
+							Button.BorderSizePixel = 0
+							Button.Size = UDim2.new(0, 90, 0, 28)
+							Button.Font = Enum.Font.Gotham
+							Button.Text = buttonText
+							Button.TextColor3 = Colors.Text
+							Button.TextSize = 11
+							Button.AutoButtonColor = false
+							Button.ZIndex = 101
+
+							local ButtonCorner = Instance.new("UICorner")
+							ButtonCorner.Parent = Button
+							ButtonCorner.CornerRadius = UDim.new(0, 4)
+
+							-- Button hover effects (matches your UI)
+							Button.MouseEnter:Connect(function()
+								game:GetService("TweenService"):Create(Button, TweenInfo.new(0.15), {
+									BackgroundColor3 = i == #buttons and Color3.fromRGB(
+										math.floor(style.Accent.R * 255 + 20),
+										math.floor(style.Accent.G * 255 + 20),
+										math.floor(style.Accent.B * 255 + 20)
+									) or Colors.Hover
+								}):Play()
+							end)
+
+							Button.MouseLeave:Connect(function()
+								game:GetService("TweenService"):Create(Button, TweenInfo.new(0.15), {
+									BackgroundColor3 = i == #buttons and style.Accent or Colors.Secondary
+								}):Play()
+							end)
+
+							-- Button click (matches your UI button click)
+							Button.MouseButton1Click:Connect(function()
+								print("🎯 [POPUP] Button clicked:", buttonText)
+								-- Click feedback
+								game:GetService("TweenService"):Create(Button, TweenInfo.new(0.1), {
+									BackgroundColor3 = Colors.Accent
+								}):Play()
+								task.wait(0.1)
+								game:GetService("TweenService"):Create(Button, TweenInfo.new(0.1), {
+									BackgroundColor3 = i == #buttons and style.Accent or Colors.Hover
+								}):Play()
+
+								if callback then
+									pcall(callback, buttonText)
+								end
+								PopupScreenGui:Destroy()
+							end)
+						end
+					end
+
+					-- Close button interactions (matches your UI)
+					CloseButton.MouseEnter:Connect(function()
+						game:GetService("TweenService"):Create(CloseButton, TweenInfo.new(0.15), {
+							TextColor3 = Colors.Text
+						}):Play()
+					end)
+
+					CloseButton.MouseLeave:Connect(function()
+						game:GetService("TweenService"):Create(CloseButton, TweenInfo.new(0.15), {
+							TextColor3 = Colors.TextMuted
+						}):Play()
+					end)
+
+					CloseButton.MouseButton1Click:Connect(function()
+						print("🎯 [POPUP] Close button clicked")
+						if callback then
+							pcall(callback, "Close")
+						end
+						PopupScreenGui:Destroy()
+					end)
+
+					-- REMOVED: Overlay click to close - popup now only closes via buttons
+
+					-- Auto-close if duration is set
+					if duration > 0 then
+						delay(duration, function()
+							if PopupScreenGui and PopupScreenGui.Parent then
+								print("🎯 [POPUP] Auto-closing popup")
+								if callback then
+									pcall(callback, "Auto")
+								end
+								PopupScreenGui:Destroy()
+							end
+						end)
+					end
+
+					-- Create buttons
+					createButtons()
+
+					print("✅ [POPUP] Popup created successfully - check PlayerGui for 'ReduxV2Popup_" .. title .. "'")
+
+					-- Return control functions
+					local popupControl = {}
+
+					function popupControl:Close(button)
+						print("🎯 [POPUP] Programmatic close called")
+						if callback then
+							pcall(callback, button or "Programmatic")
+						end
+						if PopupScreenGui and PopupScreenGui.Parent then
+							PopupScreenGui:Destroy()
+						end
+					end
+
+					function popupControl:Update(newOptions)
+						if newOptions.Title then
+							Title.Text = newOptions.Title
+						end
+						if newOptions.Message then
+							Message.Text = newOptions.Message
+						end
+					end
+
+					return popupControl
+				end
+
+				-- Quick popup methods
+				function popupService:Alert(title, message, callback)
+					return self:Show({
+						Title = title,
+						Message = message,
+						Style = "Default",
+						Buttons = {"OK"},
+						Callback = callback
+					})
+				end
+
+				function popupService:Confirm(title, message, callback)
+					return self:Show({
+						Title = title,
+						Message = message,
+						Style = "Question",
+						Buttons = {"Cancel", "Confirm"},
+						Callback = callback
+					})
+				end
+
+				function popupService:Success(title, message, callback)
+					return self:Show({
+						Title = title,
+						Message = message,
+						Style = "Success",
+						Buttons = {"OK"},
+						Callback = callback
+					})
+				end
+
+				function popupService:Error(title, message, callback)
+					return self:Show({
+						Title = title,
+						Message = message,
+						Style = "Error",
+						Buttons = {"OK"},
+						Callback = callback
+					})
+				end
+
+				function popupService:Warning(title, message, callback)
+					return self:Show({
+						Title = title,
+						Message = message,
+						Style = "Warning",
+						Buttons = {"OK"},
+						Callback = callback
+					})
+				end
+
+				return popupService
+			end
+			
+			-- DYNAaMIC CONTENT MANAGEMENT FUNCTIONS
 			function sectionFunctions:Clear()
 				-- Remove all elements from the section
 				for _, child in pairs(SectionContent:GetChildren()) do
@@ -2181,6 +2539,7 @@ function ReduxV2:CreateMain(title)
 		
 		return tabFunctions
 	end
+
 	
 	function uiFunctions:Notifications()
 		local notificationService = {}
@@ -2581,7 +2940,9 @@ function ReduxV2:CreateMain(title)
 
 		return notificationService
 	end
-
+	
+	
+	
 	return uiFunctions
 end
 
