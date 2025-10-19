@@ -1996,196 +1996,190 @@ function ReduxV2:CreateMain(title)
 				return colorPickerFunctions
 			end
 			
+			-- DYNAMIC CONTENT MANAGEMENT FUNCTIONS
+			function sectionFunctions:Clear()
+				-- Remove all elements from the section
+				for _, child in pairs(SectionContent:GetChildren()) do
+					if child:IsA("Frame") or child:IsA("TextButton") or child:IsA("TextLabel") then
+						child:Destroy()
+					end
+				end
+			end
 
+			function sectionFunctions:RemoveElement(elementName)
+				-- Remove specific element by name
+				local element = SectionContent:FindFirstChild(elementName)
+				if element then
+					element:Destroy()
+					return true
+				end
+				return false
+			end
+
+			function sectionFunctions:GetElements()
+				-- Get all elements in the section
+				local elements = {}
+				for _, child in pairs(SectionContent:GetChildren()) do
+					if child:IsA("Frame") or child:IsA("TextButton") or child:IsA("TextLabel") then
+						table.insert(elements, {
+							Name = child.Name,
+							Element = child,
+							Type = child.ClassName
+						})
+					end
+				end
+				return elements
+			end
+
+			function sectionFunctions:AddButton(buttonText, callback)
+				-- Dynamically add a button
+				local Button = Instance.new("TextButton")
+
+				Button.Name = buttonText
+				Button.Parent = SectionContent
+				Button.BackgroundColor3 = Colors.Secondary
+				Button.BorderSizePixel = 0
+				Button.Size = UDim2.new(1, 0, 0, 26)
+				Button.Font = Enum.Font.Gotham
+				Button.Text = buttonText
+				Button.TextColor3 = Colors.Text
+				Button.TextSize = 11
+				Button.AutoButtonColor = false
+
+				-- Hover effects
+				Button.MouseEnter:Connect(function()
+					game:GetService("TweenService"):Create(Button, TweenInfo.new(0.15), {
+						BackgroundColor3 = Colors.Hover
+					}):Play()
+				end)
+
+				Button.MouseLeave:Connect(function()
+					game:GetService("TweenService"):Create(Button, TweenInfo.new(0.15), {
+						BackgroundColor3 = Colors.Secondary
+					}):Play()
+				end)
+
+				Button.MouseButton1Click:Connect(function()
+					-- Click feedback
+					game:GetService("TweenService"):Create(Button, TweenInfo.new(0.1), {
+						BackgroundColor3 = Colors.Accent
+					}):Play()
+					task.wait(0.1)
+					game:GetService("TweenService"):Create(Button, TweenInfo.new(0.1), {
+						BackgroundColor3 = Colors.Hover
+					}):Play()
+
+					if callback then
+						pcall(callback)
+					end
+				end)
+
+				return Button
+			end
+
+			function sectionFunctions:AddLabel(labelText, labelStyle)
+				-- Dynamically add a label
+				local LabelContainer = Instance.new("Frame")
+				local Label = Instance.new("TextLabel")
+
+				LabelContainer.Name = labelText
+				LabelContainer.Parent = SectionContent
+				LabelContainer.BackgroundTransparency = 1
+				LabelContainer.Size = UDim2.new(1, 0, 0, 20)
+
+				Label.Name = "Label"
+				Label.Parent = LabelContainer
+				Label.BackgroundTransparency = 1
+				Label.Size = UDim2.new(1, 0, 1, 0)
+				Label.Font = Enum.Font.Gotham
+				Label.Text = labelText
+				Label.TextColor3 = Colors.TextMuted
+				Label.TextSize = 11
+				Label.TextXAlignment = Enum.TextXAlignment.Left
+				Label.TextYAlignment = Enum.TextYAlignment.Center
+
+				-- Style options
+				if labelStyle == "Accent" then
+					Label.TextColor3 = Colors.Accent
+					Label.Font = Enum.Font.GothamMedium
+				elseif labelStyle == "Success" then
+					Label.TextColor3 = Color3.fromRGB(100, 255, 150)
+				elseif labelStyle == "Warning" then
+					Label.TextColor3 = Color3.fromRGB(255, 200, 100)
+				elseif labelStyle == "Error" then
+					Label.TextColor3 = Color3.fromRGB(255, 100, 150)
+				end
+
+				return LabelContainer
+			end
+
+			function sectionFunctions:AddSeparator()
+				-- Add a visual separator
+				local Separator = Instance.new("Frame")
+				Separator.Name = "Separator"
+				Separator.Parent = SectionContent
+				Separator.BackgroundColor3 = Colors.Border
+				Separator.BorderSizePixel = 0
+				Separator.Size = UDim2.new(1, 0, 0, 1)
+				Separator.Position = UDim2.new(0, 0, 0, 2)
+
+				return Separator
+			end
+
+			function sectionFunctions:AddSpacer(height)
+				-- Add empty space
+				height = height or 8
+				local Spacer = Instance.new("Frame")
+				Spacer.Name = "Spacer"
+				Spacer.Parent = SectionContent
+				Spacer.BackgroundTransparency = 1
+				Spacer.Size = UDim2.new(1, 0, 0, height)
+
+				return Spacer
+			end
+
+			function sectionFunctions:Update()
+				-- Force update section size
+				SectionContent.Size = UDim2.new(1, 0, 0, SectionLayout.AbsoluteContentSize.Y)
+				Section.Size = UDim2.new(1, 0, 0, SectionLayout.AbsoluteContentSize.Y + 20)
+			end
+			
+			
 			
 			
 			return sectionFunctions
 		end
 		
+		-- Inside your CreateTab function, add these to tabFunctions:
+		function tabFunctions:ClearSections()
+			-- Remove all sections from the tab
+			for _, child in pairs(TabContent:GetChildren()) do
+				if child:IsA("Frame") and child.Name:find("Content") then
+					for _, section in pairs(child:GetChildren()) do
+						if section:IsA("Frame") then
+							section:Destroy()
+						end
+					end
+				end
+			end
+		end
+
+		function tabFunctions:GetSections()
+			-- Get all sections in the tab
+			local sections = {}
+			for _, child in pairs(TabContent:GetChildren()) do
+				if child:IsA("Frame") and child.Name:find("Content") then
+					for _, section in pairs(child:GetChildren()) do
+						if section:IsA("Frame") then
+							table.insert(sections, section)
+						end
+					end
+				end
+			end
+			return sections
+		end
+		
 		return tabFunctions
-	end
-	
-	function uiFunctions:CreateDynamicTab(tabName, tabIcon)
-		local tab = self:CreateTab(tabName, tabIcon)
-
-		-- Store the tab content reference for dynamic updates
-		tab.DynamicContent = {}
-
-		-- Dynamic methods for the tab
-		function tab:ClearContent()
-			-- Clear all sections and content
-			for _, content in pairs(self.DynamicContent) do
-				if content.Container and content.Container.Parent then
-					content.Container:Destroy()
-				end
-			end
-			self.DynamicContent = {}
-		end
-
-		function tab:UpdateContent(contentData, callback)
-			-- Clear existing content
-			self:ClearContent()
-
-			-- Create new content based on data
-			for sectionName, elements in pairs(contentData) do
-				local section = self:CreateSection(sectionName)
-				self.DynamicContent[sectionName] = {
-					Section = section,
-					Container = section.Parent,
-					Elements = {}
-				}
-
-				-- Create elements dynamically
-				for _, elementData in pairs(elements) do
-					local element
-
-					if elementData.Type == "Button" then
-						element = section:CreateButton(elementData.Text, function()
-							if callback then
-								pcall(callback, elementData.Text, elementData.Data)
-							end
-						end)
-
-					elseif elementData.Type == "Toggle" then
-						element = section:CreateToggle(elementData.Text, elementData.Default or false, function(state)
-							if callback then
-								pcall(callback, elementData.Text, state, elementData.Data)
-							end
-						end)
-
-					elseif elementData.Type == "Label" then
-						element = section:CreateLabel(elementData.Text)
-
-					elseif elementData.Type == "Slider" then
-						element = section:CreateSlider(
-							elementData.Text,
-							elementData.Min or 0,
-							elementData.Max or 100,
-							elementData.Default or 50,
-							function(value)
-								if callback then
-									pcall(callback, elementData.Text, value, elementData.Data)
-								end
-							end
-						)
-
-					elseif elementData.Type == "Dropdown" then
-						element = section:CreateDropdown(
-							elementData.Text,
-							elementData.Options or {},
-							function(selected)
-								if callback then
-									pcall(callback, elementData.Text, selected, elementData.Data)
-								end
-							end,
-							elementData.Default
-						)
-					end
-
-					if element then
-						table.insert(self.DynamicContent[sectionName].Elements, {
-							Element = element,
-							Data = elementData
-						})
-					end
-				end
-			end
-		end
-
-		function tab:AddElement(sectionName, elementData, callback)
-			if not self.DynamicContent[sectionName] then
-				-- Create section if it doesn't exist
-				local section = self:CreateSection(sectionName)
-				self.DynamicContent[sectionName] = {
-					Section = section,
-					Container = section.Parent,
-					Elements = {}
-				}
-			end
-
-			local section = self.DynamicContent[sectionName].Section
-			local element
-
-			if elementData.Type == "Button" then
-				element = section:CreateButton(elementData.Text, function()
-					if callback then
-						pcall(callback, elementData.Text, elementData.Data)
-					end
-				end)
-
-			elseif elementData.Type == "Toggle" then
-				element = section:CreateToggle(elementData.Text, elementData.Default or false, function(state)
-					if callback then
-						pcall(callback, elementData.Text, state, elementData.Data)
-					end
-				end)
-
-			elseif elementData.Type == "Label" then
-				element = section:CreateLabel(elementData.Text)
-
-			elseif elementData.Type == "Slider" then
-				element = section:CreateSlider(
-					elementData.Text,
-					elementData.Min or 0,
-					elementData.Max or 100,
-					elementData.Default or 50,
-					function(value)
-						if callback then
-							pcall(callback, elementData.Text, value, elementData.Data)
-						end
-					end
-				)
-
-			elseif elementData.Type == "Dropdown" then
-				element = section:CreateDropdown(
-					elementData.Text,
-					elementData.Options or {},
-					function(selected)
-						if callback then
-							pcall(callback, elementData.Text, selected, elementData.Data)
-						end
-					end,
-					elementData.Default
-				)
-			end
-
-			if element then
-				table.insert(self.DynamicContent[sectionName].Elements, {
-					Element = element,
-					Data = elementData
-				})
-			end
-
-			return element
-		end
-
-		function tab:RemoveElement(sectionName, elementText)
-			if self.DynamicContent[sectionName] then
-				for i, elementInfo in pairs(self.DynamicContent[sectionName].Elements) do
-					if elementInfo.Data.Text == elementText then
-						-- Destroy the UI element
-						if elementInfo.Element and elementInfo.Element.Destroy then
-							elementInfo.Element:Destroy()
-						elseif elementInfo.Element and elementInfo.Element.Parent then
-							elementInfo.Element:Destroy()
-						end
-
-						-- Remove from table
-						table.remove(self.DynamicContent[sectionName].Elements, i)
-						break
-					end
-				end
-			end
-		end
-
-		function tab:GetElements(sectionName)
-			if self.DynamicContent[sectionName] then
-				return self.DynamicContent[sectionName].Elements
-			end
-			return {}
-		end
-
-		return tab
 	end
 	
 	function uiFunctions:Notifications()
