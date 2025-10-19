@@ -2341,7 +2341,7 @@ function ReduxV2:CreatePopup()
 		CloseButton.ZIndex = 104
 		CloseButton.AutoButtonColor = false
 
-		-- Content area
+		-- Content area with proper text wrapping
 		local Content = Instance.new("Frame")
 		Content.Name = "Content"
 		Content.Parent = Popup
@@ -2350,9 +2350,17 @@ function ReduxV2:CreatePopup()
 		Content.Size = UDim2.new(1, -30, 0, 0)
 		Content.ZIndex = 101
 
+		-- Message container for proper text wrapping
+		local MessageContainer = Instance.new("Frame")
+		MessageContainer.Name = "MessageContainer"
+		MessageContainer.Parent = Content
+		MessageContainer.BackgroundTransparency = 1
+		MessageContainer.Size = UDim2.new(1, 0, 0, 0)
+		MessageContainer.ZIndex = 102
+
 		local Message = Instance.new("TextLabel")
 		Message.Name = "Message"
-		Message.Parent = Content
+		Message.Parent = MessageContainer
 		Message.BackgroundTransparency = 1
 		Message.Size = UDim2.new(1, 0, 0, 0)
 		Message.Font = Enum.Font.Gotham
@@ -2362,7 +2370,7 @@ function ReduxV2:CreatePopup()
 		Message.TextWrapped = true
 		Message.TextYAlignment = Enum.TextYAlignment.Top
 		Message.TextTransparency = 0
-		Message.ZIndex = 102
+		Message.ZIndex = 103
 
 		-- Buttons container
 		local ButtonsContainer = Instance.new("Frame")
@@ -2380,12 +2388,19 @@ function ReduxV2:CreatePopup()
 		ButtonsLayout.SortOrder = Enum.SortOrder.LayoutOrder
 		ButtonsLayout.Padding = UDim.new(0, 8)
 
-		-- Calculate dynamic sizes based on content
+		-- Calculate dynamic sizes based on content with proper text wrapping
 		local function calculateSizes()
-			local messageHeight = math.min(Message.TextBounds.Y + 10, 150)
+			-- Force text bounds calculation
+			Message.Size = UDim2.new(1, 0, 0, 0) -- Reset to calculate natural height
+
+			-- Wait for text bounds to update
+			wait(0.05)
+
+			local messageHeight = math.min(Message.TextBounds.Y + 20, 300) -- Increased max height for long text
 			local totalHeight = 85 + messageHeight + 45
 
 			Content.Size = UDim2.new(1, -30, 0, messageHeight)
+			MessageContainer.Size = UDim2.new(1, 0, 0, messageHeight)
 			Message.Size = UDim2.new(1, 0, 0, messageHeight)
 
 			return totalHeight
@@ -2426,7 +2441,7 @@ function ReduxV2:CreatePopup()
 				pcall(callback, button)
 			end
 		end
-		
+
 		-- Button creation function
 		local function createButtons()
 			for i, buttonText in pairs(buttons) do
@@ -2507,18 +2522,22 @@ function ReduxV2:CreatePopup()
 			end)
 		end
 
-		-- Calculate sizes and create buttons
-		local totalHeight = calculateSizes()
-		createButtons()
+		-- Calculate sizes and create buttons after a delay for proper text bounds
+		delay(0.1, function()
+			if PopupScreenGui and PopupScreenGui.Parent then
+				local totalHeight = calculateSizes()
+				createButtons()
 
-		-- Animate in
-		Popup.Size = UDim2.new(0, 0, 0, 0)
-		Popup.Position = UDim2.new(0.5, 0, 0.5, 0)
+				-- Animate in
+				Popup.Size = UDim2.new(0, 0, 0, 0)
+				Popup.Position = UDim2.new(0.5, 0, 0.5, 0)
 
-		game:GetService("TweenService"):Create(Popup, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-			Size = UDim2.new(0, 350, 0, totalHeight),
-			Position = UDim2.new(0.5, -175, 0.5, -totalHeight/2)
-		}):Play()
+				game:GetService("TweenService"):Create(Popup, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+					Size = UDim2.new(0, 350, 0, totalHeight),
+					Position = UDim2.new(0.5, -175, 0.5, -totalHeight/2)
+				}):Play()
+			end
+		end)
 
 		print("✅ [POPUP] Popup created successfully")
 
@@ -2535,7 +2554,9 @@ function ReduxV2:CreatePopup()
 			end
 			if newOptions.Message then
 				Message.Text = newOptions.Message
-				calculateSizes()
+				delay(0.05, function()
+					calculateSizes()
+				end)
 			end
 		end
 
@@ -2788,12 +2809,19 @@ function ReduxV2:Notifications()
 		CloseButton.ZIndex = 55
 		CloseButton.AutoButtonColor = false
 
-		-- Message content
+		-- Message content with proper text wrapping
+		local MessageContainer = Instance.new("Frame")
+		MessageContainer.Name = "MessageContainer"
+		MessageContainer.Parent = Content
+		MessageContainer.BackgroundTransparency = 1
+		MessageContainer.Position = UDim2.new(0, 0, 0, 25)
+		MessageContainer.Size = UDim2.new(1, 0, 0, 0)
+		MessageContainer.ZIndex = 54
+
 		local MessageLabel = Instance.new("TextLabel")
 		MessageLabel.Name = "Message"
-		MessageLabel.Parent = Content
+		MessageLabel.Parent = MessageContainer
 		MessageLabel.BackgroundTransparency = 1
-		MessageLabel.Position = UDim2.new(0, 0, 0, 25)
 		MessageLabel.Size = UDim2.new(1, 0, 0, 0)
 		MessageLabel.Font = Enum.Font.Gotham
 		MessageLabel.Text = message
@@ -2822,12 +2850,19 @@ function ReduxV2:Notifications()
 		ProgressFill.Size = UDim2.new(1, 0, 1, 0)
 		ProgressFill.ZIndex = 53
 
-		-- Calculate dynamic height
+		-- Calculate dynamic height with proper text wrapping
 		local function calculateHeight()
-			local messageHeight = math.min(MessageLabel.TextBounds.Y + 8, 60)
+			-- Force text bounds calculation
+			MessageLabel.Size = UDim2.new(1, 0, 0, 0) -- Reset to calculate natural height
+
+			-- Wait for text bounds to update
+			wait(0.05)
+
+			local messageHeight = math.min(MessageLabel.TextBounds.Y + 4, 120) -- Increased max height for more text
 			local totalHeight = 32 + messageHeight + 4
 
 			Content.Size = UDim2.new(1, -20, 0, 24 + messageHeight)
+			MessageContainer.Size = UDim2.new(1, 0, 0, messageHeight)
 			MessageLabel.Size = UDim2.new(1, 0, 0, messageHeight)
 			Notification.Size = UDim2.new(0, 300, 0, totalHeight)
 
@@ -2899,38 +2934,42 @@ function ReduxV2:Notifications()
 			end)
 		end
 
-		-- Calculate final height
-		local totalHeight = calculateHeight()
-
-		-- Add to active notifications tracking
-		local notificationData = {
-			id = notificationId,
-			gui = NotificationGui,
-			frame = Notification,
-			createdTime = tick()
-		}
-		table.insert(activeNotifications, notificationData)
-
-		-- Limit maximum notifications
-		if #activeNotifications > maxNotifications then
-			local oldestNotification = activeNotifications[1]
-			if oldestNotification and oldestNotification.gui then
-				oldestNotification.gui:Destroy()
-				table.remove(activeNotifications, 1)
-			end
-		end
-
-		-- Start position (off-screen right)
-		Notification.Position = UDim2.new(1, 10, 0, -totalHeight)
-
-		-- Slide in animation
-		game:GetService("TweenService"):Create(Notification, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-			Position = UDim2.new(1, -310, 0, -totalHeight)
-		}):Play()
-
-		-- Update all notification positions after a brief delay
+		-- Calculate final height after a small delay to ensure text bounds are calculated
 		delay(0.1, function()
-			updateNotificationPositions()
+			if NotificationGui and NotificationGui.Parent then
+				local totalHeight = calculateHeight()
+
+				-- Add to active notifications tracking
+				local notificationData = {
+					id = notificationId,
+					gui = NotificationGui,
+					frame = Notification,
+					createdTime = tick()
+				}
+				table.insert(activeNotifications, notificationData)
+
+				-- Limit maximum notifications
+				if #activeNotifications > maxNotifications then
+					local oldestNotification = activeNotifications[1]
+					if oldestNotification and oldestNotification.gui then
+						oldestNotification.gui:Destroy()
+						table.remove(activeNotifications, 1)
+					end
+				end
+
+				-- Start position (off-screen right)
+				Notification.Position = UDim2.new(1, 10, 0, -totalHeight)
+
+				-- Slide in animation
+				game:GetService("TweenService"):Create(Notification, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+					Position = UDim2.new(1, -310, 0, -totalHeight)
+				}):Play()
+
+				-- Update all notification positions after a brief delay
+				delay(0.1, function()
+					updateNotificationPositions()
+				end)
+			end
 		end)
 
 		print("✅ [NOTIFICATION] Created successfully:", title)
@@ -2956,8 +2995,10 @@ function ReduxV2:Notifications()
 
 			if newMessage then
 				MessageLabel.Text = newMessage
-				calculateHeight()
-				updateNotificationPositions()
+				delay(0.05, function()
+					calculateHeight()
+					updateNotificationPositions()
+				end)
 			end
 
 			if newDuration then
