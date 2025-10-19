@@ -1996,364 +1996,6 @@ function ReduxV2:CreateMain(title)
 				return colorPickerFunctions
 			end
 			
-			function sectionFunctions:CreatePopup()
-				local popupService = {}
-
-				-- Get the same parent as the main UI
-				local player = game.Players.LocalPlayer
-				local parent = player:WaitForChild("PlayerGui")
-
-				-- Popup styles that match your UI theme
-				local PopupStyles = {
-					Default = {
-						Accent = Colors.Accent,
-						Icon = "⚡",
-						Background = Colors.Secondary
-					},
-					Success = {
-						Accent = Color3.fromRGB(34, 197, 94),
-						Icon = "✓",
-						Background = Color3.fromRGB(20, 40, 25)
-					},
-					Warning = {
-						Accent = Color3.fromRGB(245, 158, 11),
-						Icon = "⚠",
-						Background = Color3.fromRGB(40, 35, 20)
-					},
-					Error = {
-						Accent = Color3.fromRGB(239, 68, 68),
-						Icon = "✕",
-						Background = Color3.fromRGB(40, 20, 25)
-					},
-					Question = {
-						Accent = Color3.fromRGB(59, 130, 246),
-						Icon = "?",
-						Background = Color3.fromRGB(20, 25, 40)
-					}
-				}
-
-				-- Main popup creation function
-				function popupService:Show(options)
-					options = options or {}
-
-					local style = PopupStyles[options.Style or "Default"]
-					local title = options.Title or "Notification"
-					local message = options.Message or ""
-					local buttons = options.Buttons or {"OK"}
-					local duration = options.Duration or 0
-					local callback = options.Callback
-
-					print("🎯 [POPUP] Creating popup:", title)
-
-					-- Create popup ScreenGui for this specific popup
-					local PopupScreenGui = Instance.new("ScreenGui")
-					PopupScreenGui.Name = "ReduxV2Popup_" .. title
-					PopupScreenGui.Parent = parent
-					PopupScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
-					PopupScreenGui.ResetOnSpawn = false
-					PopupScreenGui.Enabled = true
-
-					-- Main popup frame (matches your UI design)
-					local Popup = Instance.new("Frame")
-					Popup.Name = "Popup"
-					Popup.Parent = PopupScreenGui
-					Popup.BackgroundColor3 = Colors.Background
-					Popup.BorderColor3 = Colors.Border
-					Popup.BorderSizePixel = 1
-					Popup.Position = UDim2.new(0.5, -200, 0.5, -120)
-					Popup.Size = UDim2.new(0, 400, 0, 240) -- Similar to main UI size
-					Popup.ClipsDescendants = true
-					Popup.ZIndex = 99
-
-					local PopupCorner = Instance.new("UICorner")
-					PopupCorner.Parent = Popup
-					PopupCorner.CornerRadius = UDim.new(0, 8)
-
-					-- Header (matches your top bar design)
-					local Header = Instance.new("Frame")
-					Header.Name = "Header"
-					Header.Parent = Popup
-					Header.BackgroundColor3 = Colors.Secondary
-					Header.BorderSizePixel = 0
-					Header.Size = UDim2.new(1, 0, 0, 32)
-					Header.ZIndex = 100
-
-					local HeaderCorner = Instance.new("UICorner")
-					HeaderCorner.Parent = Header
-					HeaderCorner.CornerRadius = UDim.new(0, 8)
-
-					-- Accent bar at top (thin like your UI)
-					local AccentBar = Instance.new("Frame")
-					AccentBar.Name = "AccentBar"
-					AccentBar.Parent = Header
-					AccentBar.BackgroundColor3 = style.Accent
-					AccentBar.BorderSizePixel = 0
-					AccentBar.Size = UDim2.new(1, 0, 0, 2)
-					AccentBar.ZIndex = 101
-
-					-- Header content
-					local HeaderContent = Instance.new("Frame")
-					HeaderContent.Name = "HeaderContent"
-					HeaderContent.Parent = Header
-					HeaderContent.BackgroundTransparency = 1
-					HeaderContent.Position = UDim2.new(0, 12, 0, 0)
-					HeaderContent.Size = UDim2.new(1, -24, 1, 0)
-					HeaderContent.ZIndex = 101
-
-					local Icon = Instance.new("TextLabel")
-					Icon.Name = "Icon"
-					Icon.Parent = HeaderContent
-					Icon.BackgroundTransparency = 1
-					Icon.Position = UDim2.new(0, 0, 0, 0)
-					Icon.Size = UDim2.new(0, 20, 1, 0)
-					Icon.Font = Enum.Font.GothamBold
-					Icon.Text = style.Icon
-					Icon.TextColor3 = style.Accent
-					Icon.TextSize = 14
-					Icon.ZIndex = 102
-
-					local Title = Instance.new("TextLabel")
-					Title.Name = "Title"
-					Title.Parent = HeaderContent
-					Title.BackgroundTransparency = 1
-					Title.Position = UDim2.new(0, 25, 0, 0)
-					Title.Size = UDim2.new(0.7, 0, 1, 0)
-					Title.Font = Enum.Font.GothamMedium
-					Title.Text = title
-					Title.TextColor3 = Colors.Text
-					Title.TextSize = 13
-					Title.TextXAlignment = Enum.TextXAlignment.Left
-					Title.ZIndex = 102
-
-					-- Close button (matches your UI close button)
-					local CloseButton = Instance.new("TextButton")
-					CloseButton.Name = "CloseButton"
-					CloseButton.Parent = HeaderContent
-					CloseButton.BackgroundTransparency = 1
-					CloseButton.Position = UDim2.new(1, -28, 0, 0)
-					CloseButton.Size = UDim2.new(0, 28, 1, 0)
-					CloseButton.Font = Enum.Font.GothamMedium
-					CloseButton.Text = "×"
-					CloseButton.TextColor3 = Colors.TextMuted
-					CloseButton.TextSize = 16
-					CloseButton.ZIndex = 102
-					CloseButton.AutoButtonColor = false
-
-					-- Content area
-					local Content = Instance.new("Frame")
-					Content.Name = "Content"
-					Content.Parent = Popup
-					Content.BackgroundTransparency = 1
-					Content.Position = UDim2.new(0, 16, 0, 40)
-					Content.Size = UDim2.new(1, -32, 0, 120)
-					Content.ZIndex = 100
-
-					local Message = Instance.new("TextLabel")
-					Message.Name = "Message"
-					Message.Parent = Content
-					Message.BackgroundTransparency = 1
-					Message.Size = UDim2.new(1, 0, 1, 0)
-					Message.Font = Enum.Font.Gotham
-					Message.Text = message
-					Message.TextColor3 = Colors.Text
-					Message.TextSize = 12
-					Message.TextWrapped = true
-					Message.TextYAlignment = Enum.TextYAlignment.Top
-					Message.ZIndex = 101
-
-					-- Buttons container (matches your UI button style)
-					local ButtonsContainer = Instance.new("Frame")
-					ButtonsContainer.Name = "ButtonsContainer"
-					ButtonsContainer.Parent = Popup
-					ButtonsContainer.BackgroundTransparency = 1
-					ButtonsContainer.Position = UDim2.new(0, 16, 1, -48)
-					ButtonsContainer.Size = UDim2.new(1, -32, 0, 32)
-					ButtonsContainer.ZIndex = 100
-
-					local ButtonsLayout = Instance.new("UIListLayout")
-					ButtonsLayout.Parent = ButtonsContainer
-					ButtonsLayout.FillDirection = Enum.FillDirection.Horizontal
-					ButtonsLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
-					ButtonsLayout.SortOrder = Enum.SortOrder.LayoutOrder
-					ButtonsLayout.Padding = UDim.new(0, 8)
-
-					-- Button creation function (matches your UI buttons)
-					local function createButtons()
-						for i, buttonText in pairs(buttons) do
-							local Button = Instance.new("TextButton")
-							Button.Name = buttonText
-							Button.Parent = ButtonsContainer
-							Button.BackgroundColor3 = i == #buttons and style.Accent or Colors.Secondary
-							Button.BorderSizePixel = 0
-							Button.Size = UDim2.new(0, 90, 0, 28)
-							Button.Font = Enum.Font.Gotham
-							Button.Text = buttonText
-							Button.TextColor3 = Colors.Text
-							Button.TextSize = 11
-							Button.AutoButtonColor = false
-							Button.ZIndex = 101
-
-							local ButtonCorner = Instance.new("UICorner")
-							ButtonCorner.Parent = Button
-							ButtonCorner.CornerRadius = UDim.new(0, 4)
-
-							-- Button hover effects (matches your UI)
-							Button.MouseEnter:Connect(function()
-								game:GetService("TweenService"):Create(Button, TweenInfo.new(0.15), {
-									BackgroundColor3 = i == #buttons and Color3.fromRGB(
-										math.floor(style.Accent.R * 255 + 20),
-										math.floor(style.Accent.G * 255 + 20),
-										math.floor(style.Accent.B * 255 + 20)
-									) or Colors.Hover
-								}):Play()
-							end)
-
-							Button.MouseLeave:Connect(function()
-								game:GetService("TweenService"):Create(Button, TweenInfo.new(0.15), {
-									BackgroundColor3 = i == #buttons and style.Accent or Colors.Secondary
-								}):Play()
-							end)
-
-							-- Button click (matches your UI button click)
-							Button.MouseButton1Click:Connect(function()
-								print("🎯 [POPUP] Button clicked:", buttonText)
-								-- Click feedback
-								game:GetService("TweenService"):Create(Button, TweenInfo.new(0.1), {
-									BackgroundColor3 = Colors.Accent
-								}):Play()
-								task.wait(0.1)
-								game:GetService("TweenService"):Create(Button, TweenInfo.new(0.1), {
-									BackgroundColor3 = i == #buttons and style.Accent or Colors.Hover
-								}):Play()
-
-								if callback then
-									pcall(callback, buttonText)
-								end
-								PopupScreenGui:Destroy()
-							end)
-						end
-					end
-
-					-- Close button interactions (matches your UI)
-					CloseButton.MouseEnter:Connect(function()
-						game:GetService("TweenService"):Create(CloseButton, TweenInfo.new(0.15), {
-							TextColor3 = Colors.Text
-						}):Play()
-					end)
-
-					CloseButton.MouseLeave:Connect(function()
-						game:GetService("TweenService"):Create(CloseButton, TweenInfo.new(0.15), {
-							TextColor3 = Colors.TextMuted
-						}):Play()
-					end)
-
-					CloseButton.MouseButton1Click:Connect(function()
-						print("🎯 [POPUP] Close button clicked")
-						if callback then
-							pcall(callback, "Close")
-						end
-						PopupScreenGui:Destroy()
-					end)
-
-					-- REMOVED: Overlay click to close - popup now only closes via buttons
-
-					-- Auto-close if duration is set
-					if duration > 0 then
-						delay(duration, function()
-							if PopupScreenGui and PopupScreenGui.Parent then
-								print("🎯 [POPUP] Auto-closing popup")
-								if callback then
-									pcall(callback, "Auto")
-								end
-								PopupScreenGui:Destroy()
-							end
-						end)
-					end
-
-					-- Create buttons
-					createButtons()
-
-					print("✅ [POPUP] Popup created successfully - check PlayerGui for 'ReduxV2Popup_" .. title .. "'")
-
-					-- Return control functions
-					local popupControl = {}
-
-					function popupControl:Close(button)
-						print("🎯 [POPUP] Programmatic close called")
-						if callback then
-							pcall(callback, button or "Programmatic")
-						end
-						if PopupScreenGui and PopupScreenGui.Parent then
-							PopupScreenGui:Destroy()
-						end
-					end
-
-					function popupControl:Update(newOptions)
-						if newOptions.Title then
-							Title.Text = newOptions.Title
-						end
-						if newOptions.Message then
-							Message.Text = newOptions.Message
-						end
-					end
-
-					return popupControl
-				end
-
-				-- Quick popup methods
-				function popupService:Alert(title, message, callback)
-					return self:Show({
-						Title = title,
-						Message = message,
-						Style = "Default",
-						Buttons = {"OK"},
-						Callback = callback
-					})
-				end
-
-				function popupService:Confirm(title, message, callback)
-					return self:Show({
-						Title = title,
-						Message = message,
-						Style = "Question",
-						Buttons = {"Cancel", "Confirm"},
-						Callback = callback
-					})
-				end
-
-				function popupService:Success(title, message, callback)
-					return self:Show({
-						Title = title,
-						Message = message,
-						Style = "Success",
-						Buttons = {"OK"},
-						Callback = callback
-					})
-				end
-
-				function popupService:Error(title, message, callback)
-					return self:Show({
-						Title = title,
-						Message = message,
-						Style = "Error",
-						Buttons = {"OK"},
-						Callback = callback
-					})
-				end
-
-				function popupService:Warning(title, message, callback)
-					return self:Show({
-						Title = title,
-						Message = message,
-						Style = "Warning",
-						Buttons = {"OK"},
-						Callback = callback
-					})
-				end
-
-				return popupService
-			end
-			
 			-- DYNAaMIC CONTENT MANAGEMENT FUNCTIONS
 			function sectionFunctions:Clear()
 				-- Remove all elements from the section
@@ -2539,395 +2181,6 @@ function ReduxV2:CreateMain(title)
 		
 		return tabFunctions
 	end
-
-	
-	function uiFunctions:Notifications()
-		local notificationService = {}
-
-		-- Create ScreenGui for notifications
-		local NotificationScreenGui = Instance.new("ScreenGui")
-		NotificationScreenGui.Name = "ReduxV2Notifications"
-		NotificationScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-		NotificationScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-		NotificationScreenGui.ResetOnSpawn = false
-
-		-- Container frame inside ScreenGui
-		local NotificationContainer = Instance.new("Frame")
-		NotificationContainer.Name = "NotificationContainer"
-		NotificationContainer.Parent = NotificationScreenGui
-		NotificationContainer.BackgroundTransparency = 1
-		NotificationContainer.Size = UDim2.new(1, 0, 1, 0)
-
-		local NotificationLayout = Instance.new("UIListLayout")
-		NotificationLayout.Name = "NotificationLayout"
-		NotificationLayout.Parent = NotificationContainer
-		NotificationLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
-		NotificationLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
-		NotificationLayout.SortOrder = Enum.SortOrder.LayoutOrder
-		NotificationLayout.Padding = UDim.new(0, 8)
-
-		-- Ultra sleek notification styles
-		local NotificationStyles = {
-			Success = {
-				Accent = Color3.fromRGB(34, 197, 94),
-				Background = Color3.fromRGB(20, 40, 25),
-				Icon = "✓",
-				Gradient = ColorSequence.new({
-					ColorSequenceKeypoint.new(0, Color3.fromRGB(34, 197, 94)),
-					ColorSequenceKeypoint.new(1, Color3.fromRGB(21, 128, 61))
-				})
-			},
-			Error = {
-				Accent = Color3.fromRGB(239, 68, 68),
-				Background = Color3.fromRGB(40, 20, 25),
-				Icon = "✕",
-				Gradient = ColorSequence.new({
-					ColorSequenceKeypoint.new(0, Color3.fromRGB(239, 68, 68)),
-					ColorSequenceKeypoint.new(1, Color3.fromRGB(185, 28, 28))
-				})
-			},
-			Warning = {
-				Accent = Color3.fromRGB(245, 158, 11),
-				Background = Color3.fromRGB(40, 35, 20),
-				Icon = "⚠",
-				Gradient = ColorSequence.new({
-					ColorSequenceKeypoint.new(0, Color3.fromRGB(245, 158, 11)),
-					ColorSequenceKeypoint.new(1, Color3.fromRGB(180, 83, 9))
-				})
-			},
-			Info = {
-				Accent = Color3.fromRGB(59, 130, 246),
-				Background = Color3.fromRGB(20, 25, 40),
-				Icon = "ℹ",
-				Gradient = ColorSequence.new({
-					ColorSequenceKeypoint.new(0, Color3.fromRGB(59, 130, 246)),
-					ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 64, 175))
-				})
-			},
-			Premium = {
-				Accent = Colors.Accent,
-				Background = Color3.fromRGB(25, 20, 40),
-				Icon = "✦",
-				Gradient = ColorSequence.new({
-					ColorSequenceKeypoint.new(0, Colors.Accent),
-					ColorSequenceKeypoint.new(1, Color3.fromRGB(108, 43, 176))
-				})
-			}
-		}
-
-		-- Create notification function
-		function notificationService:Notify(style, message, duration)
-			duration = duration or 4
-
-			local styleData = NotificationStyles[style] or NotificationStyles.Info
-
-			-- Main notification frame (Ultra thin)
-			local Notification = Instance.new("Frame")
-			Notification.Name = "Notification"
-			Notification.Parent = NotificationContainer
-			Notification.BackgroundColor3 = styleData.Background
-			Notification.BackgroundTransparency = 1
-			Notification.BorderSizePixel = 0
-			Notification.Size = UDim2.new(0, 320, 0, 60) -- Thinner height
-			Notification.Position = UDim2.new(1, 10, 1, 0)
-			Notification.ZIndex = 10
-			Notification.ClipsDescendants = true
-
-			local NotificationCorner = Instance.new("UICorner")
-			NotificationCorner.Name = "NotificationCorner"
-			NotificationCorner.Parent = Notification
-			NotificationCorner.CornerRadius = UDim.new(0, 8)
-
-			-- Thin accent border (1px)
-			local AccentBorder = Instance.new("Frame")
-			AccentBorder.Name = "AccentBorder"
-			AccentBorder.Parent = Notification
-			AccentBorder.BackgroundColor3 = styleData.Accent
-			AccentBorder.BorderSizePixel = 0
-			AccentBorder.Size = UDim2.new(0, 3, 1, 0) -- Thin vertical line
-			AccentBorder.ZIndex = 11
-
-			local BorderCorner = Instance.new("UICorner")
-			BorderCorner.Parent = AccentBorder
-			BorderCorner.CornerRadius = UDim.new(0, 2)
-
-			-- Main content area
-			local Content = Instance.new("Frame")
-			Content.Name = "Content"
-			Content.Parent = Notification
-			Content.BackgroundTransparency = 1
-			Content.Position = UDim2.new(0, 12, 0, 0)
-			Content.Size = UDim2.new(1, -24, 1, 0)
-			Content.ZIndex = 12
-
-			-- Icon with subtle glow
-			local IconContainer = Instance.new("Frame")
-			IconContainer.Name = "IconContainer"
-			IconContainer.Parent = Content
-			IconContainer.BackgroundTransparency = 1
-			IconContainer.Position = UDim2.new(0, 0, 0, 12)
-			IconContainer.Size = UDim2.new(0, 24, 0, 24)
-			IconContainer.ZIndex = 13
-
-			local Icon = Instance.new("TextLabel")
-			Icon.Name = "Icon"
-			Icon.Parent = IconContainer
-			Icon.BackgroundTransparency = 1
-			Icon.Size = UDim2.new(1, 0, 1, 0)
-			Icon.Font = Enum.Font.GothamBlack
-			Icon.Text = styleData.Icon
-			Icon.TextColor3 = styleData.Accent
-			Icon.TextSize = 14
-			Icon.TextTransparency = 1
-			Icon.ZIndex = 14
-
-			-- Text content
-			local TextContainer = Instance.new("Frame")
-			TextContainer.Name = "TextContainer"
-			TextContainer.Parent = Content
-			TextContainer.BackgroundTransparency = 1
-			TextContainer.Position = UDim2.new(0, 32, 0, 0)
-			TextContainer.Size = UDim2.new(1, -44, 1, 0)
-			TextContainer.ZIndex = 13
-
-			local Title = Instance.new("TextLabel")
-			Title.Name = "Title"
-			Title.Parent = TextContainer
-			Title.BackgroundTransparency = 1
-			Title.Position = UDim2.new(0, 0, 0, 10)
-			Title.Size = UDim2.new(1, 0, 0, 18)
-			Title.Font = Enum.Font.GothamBold
-			Title.Text = string.upper(style)
-			Title.TextColor3 = Colors.Text
-			Title.TextSize = 10
-			Title.TextTransparency = 1
-			Title.TextXAlignment = Enum.TextXAlignment.Left
-			Title.ZIndex = 14
-
-			local Message = Instance.new("TextLabel")
-			Message.Name = "Message"
-			Message.Parent = TextContainer
-			Message.BackgroundTransparency = 1
-			Message.Position = UDim2.new(0, 0, 0, 26)
-			Message.Size = UDim2.new(1, 0, 0, 24)
-			Message.Font = Enum.Font.Gotham
-			Message.Text = message
-			Message.TextColor3 = Colors.TextMuted
-			Message.TextSize = 11
-			Message.TextTransparency = 1
-			Message.TextWrapped = true
-			Message.TextXAlignment = Enum.TextXAlignment.Left
-			Message.TextYAlignment = Enum.TextYAlignment.Top
-			Message.ZIndex = 14
-
-			-- Close button (minimal)
-			local CloseButton = Instance.new("TextButton")
-			CloseButton.Name = "CloseButton"
-			CloseButton.Parent = Content
-			CloseButton.BackgroundTransparency = 1
-			CloseButton.Position = UDim2.new(1, -20, 0, 10)
-			CloseButton.Size = UDim2.new(0, 16, 0, 16)
-			CloseButton.Font = Enum.Font.GothamMedium
-			CloseButton.Text = "×"
-			CloseButton.TextColor3 = Colors.TextMuted
-			CloseButton.TextSize = 16
-			CloseButton.TextTransparency = 1
-			CloseButton.ZIndex = 14
-			CloseButton.AutoButtonColor = false
-
-			-- Progress indicator (ultra thin)
-			local ProgressTrack = Instance.new("Frame")
-			ProgressTrack.Name = "ProgressTrack"
-			ProgressTrack.Parent = Notification
-			ProgressTrack.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-			ProgressTrack.BorderSizePixel = 0
-			ProgressTrack.Position = UDim2.new(0, 0, 1, -2)
-			ProgressTrack.Size = UDim2.new(1, 0, 0, 1)
-			ProgressTrack.ZIndex = 13
-
-			local ProgressFill = Instance.new("Frame")
-			ProgressFill.Name = "ProgressFill"
-			ProgressFill.Parent = ProgressTrack
-			ProgressFill.BackgroundColor3 = styleData.Accent
-			ProgressFill.BorderSizePixel = 0
-			ProgressFill.Size = UDim2.new(1, 0, 1, 0)
-			ProgressFill.ZIndex = 14
-
-			-- Animation functions
-			local function showNotification()
-				-- Start position (off-screen right)
-				Notification.Position = UDim2.new(1, 10, 1, 0)
-				Notification.BackgroundTransparency = 1
-
-				-- Slide in with bounce
-				game:GetService("TweenService"):Create(Notification, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-					Position = UDim2.new(1, -330, 1, -68),
-					BackgroundTransparency = 0
-				}):Play()
-
-				-- Staggered content fade in
-				delay(0.1, function()
-					game:GetService("TweenService"):Create(Icon, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
-						TextTransparency = 0
-					}):Play()
-				end)
-
-				delay(0.15, function()
-					game:GetService("TweenService"):Create(Title, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
-						TextTransparency = 0
-					}):Play()
-				end)
-
-				delay(0.2, function()
-					game:GetService("TweenService"):Create(Message, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
-						TextTransparency = 0
-					}):Play()
-					game:GetService("TweenService"):Create(CloseButton, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {
-						TextTransparency = 0.7
-					}):Play()
-				end)
-
-			end
-
-			local function hideNotification()
-				-- Quick fade out content
-				game:GetService("TweenService"):Create(Icon, TweenInfo.new(0.15), {
-					TextTransparency = 1
-				}):Play()
-				game:GetService("TweenService"):Create(Title, TweenInfo.new(0.15), {
-					TextTransparency = 1
-				}):Play()
-				game:GetService("TweenService"):Create(Message, TweenInfo.new(0.15), {
-					TextTransparency = 1
-				}):Play()
-				game:GetService("TweenService"):Create(CloseButton, TweenInfo.new(0.15), {
-					TextTransparency = 1
-				}):Play()
-
-				-- Slide out quickly
-				game:GetService("TweenService"):Create(Notification, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
-					Position = UDim2.new(1, 10, 1, 0),
-					BackgroundTransparency = 1
-				}):Play()
-
-				-- Destroy after animation
-				delay(0.3, function()
-					if Notification and Notification.Parent then
-						Notification:Destroy()
-					end
-				end)
-			end
-
-			-- Close button interactions
-			CloseButton.MouseEnter:Connect(function()
-				game:GetService("TweenService"):Create(CloseButton, TweenInfo.new(0.2), {
-					TextColor3 = Colors.Text,
-					TextTransparency = 0
-				}):Play()
-			end)
-
-			CloseButton.MouseLeave:Connect(function()
-				game:GetService("TweenService"):Create(CloseButton, TweenInfo.new(0.2), {
-					TextColor3 = Colors.TextMuted,
-					TextTransparency = 0.7
-				}):Play()
-			end)
-
-			CloseButton.MouseButton1Click:Connect(function()
-				-- Click feedback
-				game:GetService("TweenService"):Create(CloseButton, TweenInfo.new(0.1), {
-					TextSize = 14
-				}):Play()
-				game:GetService("TweenService"):Create(CloseButton, TweenInfo.new(0.1, Enum.EasingStyle.Back), {
-					TextSize = 16
-				}):Play()
-
-				hideNotification()
-			end)
-
-			-- Show notification
-			showNotification()
-
-			-- Return notification control functions
-			local notificationControl = {}
-
-			function notificationControl:Update(message, newStyle, newDuration)
-				if newStyle and NotificationStyles[newStyle] then
-					local newStyleData = NotificationStyles[newStyle]
-					styleData = newStyleData
-
-					Notification.BackgroundColor3 = newStyleData.Background
-					AccentBorder.BackgroundColor3 = newStyleData.Accent
-					ProgressFill.BackgroundColor3 = newStyleData.Accent
-					Icon.Text = newStyleData.Icon
-					Icon.TextColor3 = newStyleData.Accent
-					Title.Text = string.upper(newStyle)
-				end
-
-				if message then
-					Message.Text = message
-				end
-
-				if newDuration then
-					-- Reset progress bar
-					ProgressFill.Size = UDim2.new(1, 0, 1, 0)
-					game:GetService("TweenService"):Create(ProgressFill, TweenInfo.new(newDuration, Enum.EasingStyle.Linear), {
-						Size = UDim2.new(0, 0, 1, 0)
-					}):Play()
-				end
-			end
-
-			function notificationControl:Close()
-				hideNotification()
-			end
-
-			return notificationControl
-		end
-
-		-- Quick notification methods
-		function notificationService:Success(message, duration)
-			return self:Notify("Success", message, duration)
-		end
-
-		function notificationService:Error(message, duration)
-			return self:Notify("Error", message, duration)
-		end
-
-		function notificationService:Warning(message, duration)
-			return self:Notify("Warning", message, duration)
-		end
-
-		function notificationService:Info(message, duration)
-			return self:Notify("Info", message, duration)
-		end
-
-		function notificationService:Premium(message, duration)
-			return self:Notify("Premium", message, duration)
-		end
-
-		-- Clear all notifications
-		function notificationService:ClearAll()
-			for _, notification in pairs(NotificationContainer:GetChildren()) do
-				if notification:IsA("Frame") and notification.Name == "Notification" then
-					notification:Destroy()
-				end
-			end
-		end
-
-		-- Get notification count
-		function notificationService:GetCount()
-			local count = 0
-			for _, notification in pairs(NotificationContainer:GetChildren()) do
-				if notification:IsA("Frame") and notification.Name == "Notification" then
-					count += 1
-				end
-			end
-			return count
-		end
-
-		return notificationService
-	end
-	
 	
 	
 	return uiFunctions
@@ -3341,6 +2594,422 @@ function ReduxV2:CreatePopup()
 	end
 
 	return popupService
+end
+
+function ReduxV2:Notifications()
+	local notificationService = {}
+
+	-- Get player gui
+	local player = game.Players.LocalPlayer
+	local parent = player:WaitForChild("PlayerGui")
+
+	-- Notification styles that match your UI theme
+	local NotificationStyles = {
+		Success = {
+			Accent = Color3.fromRGB(34, 197, 94),
+			Background = Colors.Background,
+			Secondary = Colors.Secondary,
+			Icon = "✓",
+			Border = Colors.Border
+		},
+		Error = {
+			Accent = Color3.fromRGB(239, 68, 68),
+			Background = Colors.Background,
+			Secondary = Colors.Secondary,
+			Icon = "✕",
+			Border = Colors.Border
+		},
+		Warning = {
+			Accent = Color3.fromRGB(245, 158, 11),
+			Background = Colors.Background,
+			Secondary = Colors.Secondary,
+			Icon = "⚠",
+			Border = Colors.Border
+		},
+		Info = {
+			Accent = Color3.fromRGB(59, 130, 246),
+			Background = Colors.Background,
+			Secondary = Colors.Secondary,
+			Icon = "ℹ",
+			Border = Colors.Border
+		},
+		Premium = {
+			Accent = Colors.Accent,
+			Background = Colors.Background,
+			Secondary = Colors.Secondary,
+			Icon = "⚡",
+			Border = Colors.Border
+		}
+	}
+
+	-- Track active notifications for stacking
+	local activeNotifications = {}
+	local notificationOffset = 10 -- Starting offset from top
+	local notificationSpacing = 8 -- Space between notifications
+	local maxNotifications = 5 -- Maximum notifications visible at once
+
+	-- Function to update all notification positions
+	local function updateNotificationPositions()
+		local currentOffset = notificationOffset
+
+		-- Sort notifications by creation time (oldest first)
+		table.sort(activeNotifications, function(a, b)
+			return a.createdTime < b.createdTime
+		end)
+
+		-- Update positions for all active notifications
+		for i, notificationData in ipairs(activeNotifications) do
+			if notificationData.gui and notificationData.gui.Parent then
+				local targetPosition = UDim2.new(1, -310, 0, currentOffset)
+
+				-- Animate to new position
+				game:GetService("TweenService"):Create(notificationData.frame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+					Position = targetPosition
+				}):Play()
+
+				-- Calculate next position
+				if notificationData.frame and notificationData.frame.AbsoluteSize then
+					currentOffset = currentOffset + notificationData.frame.AbsoluteSize.Y + notificationSpacing
+				else
+					currentOffset = currentOffset + 80 + notificationSpacing -- Fallback height
+				end
+			end
+		end
+	end
+
+	-- Function to remove notification from tracking
+	local function removeNotification(notificationId)
+		for i, notificationData in ipairs(activeNotifications) do
+			if notificationData.id == notificationId then
+				table.remove(activeNotifications, i)
+				break
+			end
+		end
+		updateNotificationPositions()
+	end
+
+	-- Main notification function
+	function notificationService:Notify(style, title, message, duration)
+		duration = duration or 5
+		local styleData = NotificationStyles[style] or NotificationStyles.Info
+
+		print("🔔 [NOTIFICATION] Creating:", title, message)
+
+		-- Create individual notification ScreenGui for each notification
+		local NotificationGui = Instance.new("ScreenGui")
+		local notificationId = "Notification_" .. tostring(tick())
+		NotificationGui.Name = notificationId
+		NotificationGui.Parent = parent
+		NotificationGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+		NotificationGui.ResetOnSpawn = false
+
+		-- Main notification frame
+		local Notification = Instance.new("Frame")
+		Notification.Name = "Notification"
+		Notification.Parent = NotificationGui
+		Notification.BackgroundColor3 = styleData.Background
+		Notification.BorderColor3 = styleData.Border
+		Notification.BorderSizePixel = 1
+		Notification.Size = UDim2.new(0, 300, 0, 0) -- Start at 0 height for animation
+		Notification.Position = UDim2.new(1, 10, 0, 0)
+		Notification.ClipsDescendants = true
+		Notification.ZIndex = 51
+
+		local NotificationCorner = Instance.new("UICorner")
+		NotificationCorner.Parent = Notification
+		NotificationCorner.CornerRadius = UDim.new(0, 6)
+
+		-- Thin accent border on left
+		local AccentBorder = Instance.new("Frame")
+		AccentBorder.Name = "AccentBorder"
+		AccentBorder.Parent = Notification
+		AccentBorder.BackgroundColor3 = styleData.Accent
+		AccentBorder.BorderSizePixel = 0
+		AccentBorder.Size = UDim2.new(0, 3, 1, 0)
+		AccentBorder.ZIndex = 52
+
+		local BorderCorner = Instance.new("UICorner")
+		BorderCorner.Parent = AccentBorder
+		BorderCorner.CornerRadius = UDim.new(0, 2)
+
+		-- Content area
+		local Content = Instance.new("Frame")
+		Content.Name = "Content"
+		Content.Parent = Notification
+		Content.BackgroundTransparency = 1
+		Content.Position = UDim2.new(0, 10, 0, 8)
+		Content.Size = UDim2.new(1, -20, 1, -16)
+		Content.ZIndex = 53
+
+		-- Header row
+		local Header = Instance.new("Frame")
+		Header.Name = "Header"
+		Header.Parent = Content
+		Header.BackgroundTransparency = 1
+		Header.Size = UDim2.new(1, 0, 0, 20)
+		Header.ZIndex = 54
+
+		local Icon = Instance.new("TextLabel")
+		Icon.Name = "Icon"
+		Icon.Parent = Header
+		Icon.BackgroundTransparency = 1
+		Icon.Position = UDim2.new(0, 0, 0, 0)
+		Icon.Size = UDim2.new(0, 20, 1, 0)
+		Icon.Font = Enum.Font.GothamBold
+		Icon.Text = styleData.Icon
+		Icon.TextColor3 = styleData.Accent
+		Icon.TextSize = 12
+		Icon.ZIndex = 55
+
+		local TitleLabel = Instance.new("TextLabel")
+		TitleLabel.Name = "Title"
+		TitleLabel.Parent = Header
+		TitleLabel.BackgroundTransparency = 1
+		TitleLabel.Position = UDim2.new(0, 25, 0, 0)
+		TitleLabel.Size = UDim2.new(0.7, 0, 1, 0)
+		TitleLabel.Font = Enum.Font.GothamMedium
+		TitleLabel.Text = string.upper(title)
+		TitleLabel.TextColor3 = Colors.Text
+		TitleLabel.TextSize = 11
+		TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+		TitleLabel.ZIndex = 55
+
+		-- Close button
+		local CloseButton = Instance.new("TextButton")
+		CloseButton.Name = "CloseButton"
+		CloseButton.Parent = Header
+		CloseButton.BackgroundTransparency = 1
+		CloseButton.Position = UDim2.new(1, -20, 0, 2)
+		CloseButton.Size = UDim2.new(0, 16, 0, 16)
+		CloseButton.Font = Enum.Font.GothamMedium
+		CloseButton.Text = "×"
+		CloseButton.TextColor3 = Colors.TextMuted
+		CloseButton.TextSize = 14
+		CloseButton.ZIndex = 55
+		CloseButton.AutoButtonColor = false
+
+		-- Message content
+		local MessageLabel = Instance.new("TextLabel")
+		MessageLabel.Name = "Message"
+		MessageLabel.Parent = Content
+		MessageLabel.BackgroundTransparency = 1
+		MessageLabel.Position = UDim2.new(0, 0, 0, 25)
+		MessageLabel.Size = UDim2.new(1, 0, 0, 0)
+		MessageLabel.Font = Enum.Font.Gotham
+		MessageLabel.Text = message
+		MessageLabel.TextColor3 = Colors.TextMuted
+		MessageLabel.TextSize = 11
+		MessageLabel.TextWrapped = true
+		MessageLabel.TextXAlignment = Enum.TextXAlignment.Left
+		MessageLabel.TextYAlignment = Enum.TextYAlignment.Top
+		MessageLabel.ZIndex = 54
+
+		-- Progress bar
+		local ProgressTrack = Instance.new("Frame")
+		ProgressTrack.Name = "ProgressTrack"
+		ProgressTrack.Parent = Notification
+		ProgressTrack.BackgroundColor3 = styleData.Secondary
+		ProgressTrack.BorderSizePixel = 0
+		ProgressTrack.Position = UDim2.new(0, 3, 1, -2)
+		ProgressTrack.Size = UDim2.new(1, -6, 0, 1)
+		ProgressTrack.ZIndex = 52
+
+		local ProgressFill = Instance.new("Frame")
+		ProgressFill.Name = "ProgressFill"
+		ProgressFill.Parent = ProgressTrack
+		ProgressFill.BackgroundColor3 = styleData.Accent
+		ProgressFill.BorderSizePixel = 0
+		ProgressFill.Size = UDim2.new(1, 0, 1, 0)
+		ProgressFill.ZIndex = 53
+
+		-- Calculate dynamic height
+		local function calculateHeight()
+			local messageHeight = math.min(MessageLabel.TextBounds.Y + 8, 60)
+			local totalHeight = 32 + messageHeight + 4
+
+			Content.Size = UDim2.new(1, -20, 0, 24 + messageHeight)
+			MessageLabel.Size = UDim2.new(1, 0, 0, messageHeight)
+			Notification.Size = UDim2.new(0, 300, 0, totalHeight)
+
+			return totalHeight
+		end
+
+		-- Close notification function
+		local function closeNotification()
+			print("🔔 [NOTIFICATION] Closing:", title)
+
+			-- Remove from tracking
+			removeNotification(notificationId)
+
+			-- Slide out animation
+			game:GetService("TweenService"):Create(Notification, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
+				Position = UDim2.new(1, 10, 0, -Notification.AbsoluteSize.Y)
+			}):Play()
+
+			-- Fade out content
+			game:GetService("TweenService"):Create(Icon, TweenInfo.new(0.2), {
+				TextTransparency = 1
+			}):Play()
+			game:GetService("TweenService"):Create(TitleLabel, TweenInfo.new(0.2), {
+				TextTransparency = 1
+			}):Play()
+			game:GetService("TweenService"):Create(MessageLabel, TweenInfo.new(0.2), {
+				TextTransparency = 1
+			}):Play()
+			game:GetService("TweenService"):Create(CloseButton, TweenInfo.new(0.2), {
+				TextTransparency = 1
+			}):Play()
+
+			-- Destroy after animation
+			delay(0.3, function()
+				if NotificationGui and NotificationGui.Parent then
+					NotificationGui:Destroy()
+				end
+			end)
+		end
+
+		-- Close button interactions
+		CloseButton.MouseEnter:Connect(function()
+			game:GetService("TweenService"):Create(CloseButton, TweenInfo.new(0.15), {
+				TextColor3 = Colors.Text
+			}):Play()
+		end)
+
+		CloseButton.MouseLeave:Connect(function()
+			game:GetService("TweenService"):Create(CloseButton, TweenInfo.new(0.15), {
+				TextColor3 = Colors.TextMuted
+			}):Play()
+		end)
+
+		CloseButton.MouseButton1Click:Connect(function()
+			closeNotification()
+		end)
+
+		-- Auto-close after duration
+		if duration > 0 then
+			-- Progress bar animation
+			game:GetService("TweenService"):Create(ProgressFill, TweenInfo.new(duration, Enum.EasingStyle.Linear), {
+				Size = UDim2.new(0, 0, 1, 0)
+			}):Play()
+
+			delay(duration, function()
+				if NotificationGui and NotificationGui.Parent then
+					closeNotification()
+				end
+			end)
+		end
+
+		-- Calculate final height
+		local totalHeight = calculateHeight()
+
+		-- Add to active notifications tracking
+		local notificationData = {
+			id = notificationId,
+			gui = NotificationGui,
+			frame = Notification,
+			createdTime = tick()
+		}
+		table.insert(activeNotifications, notificationData)
+
+		-- Limit maximum notifications
+		if #activeNotifications > maxNotifications then
+			local oldestNotification = activeNotifications[1]
+			if oldestNotification and oldestNotification.gui then
+				oldestNotification.gui:Destroy()
+				table.remove(activeNotifications, 1)
+			end
+		end
+
+		-- Start position (off-screen right)
+		Notification.Position = UDim2.new(1, 10, 0, -totalHeight)
+
+		-- Slide in animation
+		game:GetService("TweenService"):Create(Notification, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+			Position = UDim2.new(1, -310, 0, -totalHeight)
+		}):Play()
+
+		-- Update all notification positions after a brief delay
+		delay(0.1, function()
+			updateNotificationPositions()
+		end)
+
+		print("✅ [NOTIFICATION] Created successfully:", title)
+
+		-- Return notification control
+		local notificationControl = {}
+
+		function notificationControl:Close()
+			closeNotification()
+		end
+
+		function notificationControl:Update(newMessage, newStyle, newDuration)
+			if newStyle and NotificationStyles[newStyle] then
+				local newStyleData = NotificationStyles[newStyle]
+				styleData = newStyleData
+
+				AccentBorder.BackgroundColor3 = newStyleData.Accent
+				ProgressFill.BackgroundColor3 = newStyleData.Accent
+				Icon.Text = newStyleData.Icon
+				Icon.TextColor3 = newStyleData.Accent
+				TitleLabel.Text = string.upper(title)
+			end
+
+			if newMessage then
+				MessageLabel.Text = newMessage
+				calculateHeight()
+				updateNotificationPositions()
+			end
+
+			if newDuration then
+				-- Reset progress bar
+				ProgressFill.Size = UDim2.new(1, 0, 1, 0)
+				game:GetService("TweenService"):Create(ProgressFill, TweenInfo.new(newDuration, Enum.EasingStyle.Linear), {
+					Size = UDim2.new(0, 0, 1, 0)
+				}):Play()
+			end
+		end
+
+		return notificationControl
+	end
+
+	-- Quick notification methods
+	function notificationService:Success(message, duration)
+		return self:Notify("Success", "Success", message, duration)
+	end
+
+	function notificationService:Error(message, duration)
+		return self:Notify("Error", "Error", message, duration)
+	end
+
+	function notificationService:Warning(message, duration)
+		return self:Notify("Warning", "Warning", message, duration)
+	end
+
+	function notificationService:Info(message, duration)
+		return self:Notify("Info", "Information", message, duration)
+	end
+
+	function notificationService:Premium(message, duration)
+		return self:Notify("Premium", "Premium", message, duration)
+	end
+
+	-- Clear all notifications
+	function notificationService:ClearAll()
+		print("🔔 [NOTIFICATION] Clearing all notifications")
+		for _, notificationData in ipairs(activeNotifications) do
+			if notificationData.gui and notificationData.gui.Parent then
+				notificationData.gui:Destroy()
+			end
+		end
+		activeNotifications = {}
+	end
+
+	-- Get notification count
+	function notificationService:GetCount()
+		return #activeNotifications
+	end
+
+	return notificationService
 end
 
 return ReduxV2
