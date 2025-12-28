@@ -21,11 +21,11 @@ function ReduxV2:CreateMain(title)
 	local parent = player:WaitForChild("PlayerGui")
 
 	-- Destroy existing UI with same name
-	local destroyIfExist = parent:GetChildren()
-	for _, gui in pairs(destroyIfExist) do
-		if gui.Name == title then
-			print("ReduxV2: Destroyed existing "..tostring(title))
-			gui:Destroy()
+	local destroyIfExist = game.CoreGui:GetChildren()
+	for index, destroyIfExist in pairs(destroyIfExist) do
+		if destroyIfExist.Name == title then
+			print("Destroyed "..tostring(title)..": Already existed")
+			destroyIfExist:Destroy()
 		end
 	end
 
@@ -45,7 +45,7 @@ function ReduxV2:CreateMain(title)
 
 	-- ScreenGui
 	ReduxV2.Name = title
-	ReduxV2.Parent = parent
+	ReduxV2.Parent = game:WaitForChild("CoreGui")
 	ReduxV2.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	ReduxV2.ResetOnSpawn = false
 
