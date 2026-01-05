@@ -765,7 +765,7 @@ function ReduxV2:CreateMain(title)
 					Error = {Color = Color3.fromRGB(255, 100, 150), Accent = true}
 				}
 
-				local style = styles[labelStyle or "Default"]
+				local style = styles[labelStyle] or styles["Default"]
 
 				-- Accent bar
 				if style.Accent then
